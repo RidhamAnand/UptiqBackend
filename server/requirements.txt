@@ -1,12 +1,5 @@
-Flask @ file:///croot/flask_1716545870149/work
+flask==3.0.0
 Flask-Cors==5.0.0
-fonttools @ file:///croot/fonttools_1713551344105/work
-frozendict @ file:///croot/frozendict_1713194832637/work
-frozenlist @ file:///work/perseverance-python-buildout/croot/frozenlist_1698886842990/work
-fsspec @ file:///croot/fsspec_1724855583730/work
-gensim @ file:///croot/gensim_1725057941774/work
-gitdb @ file:///tmp/build/80754af9/gitdb_1617117951232/work
-GitPython @ file:///croot/gitpython_1720455034730/work
 google-api-core==2.24.1
 google-auth==2.37.0
 google-auth-httplib2==0.2.0
@@ -19,58 +12,33 @@ google-cloud-storage==2.19.0
 google-crc32c==1.6.0
 google-resumable-media==2.7.2
 googleapis-common-protos==1.66.0
-greenlet @ file:///croot/greenlet_1702059959679/work
 grpc-google-iam-v1==0.14.0
 grpcio==1.70.0
 grpcio-status==1.70.0
 gunicorn==23.0.0
-h11 @ file:///croot/h11_1706652277403/work
-h5py @ file:///croot/h5py_1715094721489/work
-HeapDict @ file:///Users/ktietz/demo/mc3/conda-bld/heapdict_1630598515714/work
-holoviews @ file:///croot/holoviews_1720533861358/work
 html5lib==1.1
-httpcore @ file:///croot/httpcore_1706728464539/work
 httplib2==0.22.0
 httpx==0.28.1
 httpx-sse==0.4.0
-kiwisolver @ file:///work/perseverance-python-buildout/croot/kiwisolver_1698847502605/work
 langchain==0.3.16
 langchain-community==0.3.16
 langchain-core==0.3.32
 langchain-google-vertexai==2.0.12
 langchain-openai==0.3.0
-langchain-text-splitters @ file:///home/conda/feedstock_root/build_artifacts/langchain-text-splitters_1736285587843/work
 langgraph==0.2.69
 langgraph-checkpoint==2.0.10
 langgraph-sdk==0.1.51
-langsmith @ file:///home/conda/feedstock_root/build_artifacts/langsmith_1737099297406/work
 pinecone==5.4.2
 pinecone-plugin-inference==3.1.0
 pinecone-plugin-interface==0.0.7
 pydantic==2.10.6
 pydantic-settings==2.7.1
 pydantic_core==2.27.2
-pydeck @ file:///croot/pydeck_1706194064552/work
-PyDispatcher @ file:///work/perseverance-python-buildout/croot/pydispatcher_1698871512960/work
-pydocstyle @ file:///work/perseverance-python-buildout/croot/pydocstyle_1698865417470/work
-pyerfa @ file:///croot/pyerfa_1717700762709/work
-pyflakes @ file:///croot/pyflakes_1708962956225/work
-Pygments @ file:///work/perseverance-python-buildout/croot/pygments_1698846270603/work
 pyHanko==0.25.3
 pyhanko-certvalidator==0.26.5
-PyJWT @ file:///croot/pyjwt_1715094751094/work
-pylint @ file:///work/perseverance-python-buildout/croot/pylint_1698865458204/work
-pylint-venv @ file:///croot/pylint-venv_1709837612550/work
 pyls-spyder==0.4.0
 pymongo==4.11
-pyodbc @ file:///croot/pyodbc_1725560222485/work
-pyOpenSSL @ file:///croot/pyopenssl_1723651579422/work
-pyparsing @ file:///croot/pyparsing_1725041624202/work
 pypdf==5.2.0
 PyQt5==5.15.10
-PyQt5-sip @ file:///work/perseverance-python-buildout/croot/pyqt-split_1698847927472/work/pyqt_sip
-requests @ file:///croot/requests_1721410876868/work
-requests-file @ file:///Users/ktietz/demo/mc3/conda-bld/requests-file_1629455781986/work
 requests-oauthlib==2.0.0
-requests-toolbelt @ file:///work/perseverance-python-buildout/croot/requests-toolbelt_1698846872000/work
 
