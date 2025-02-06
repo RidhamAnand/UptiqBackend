@@ -18,6 +18,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @app.route("/getHistory",methods=["GET"])
+@cross_origin()
 def getHistory():
     try:
         db = connectDB()
@@ -40,6 +41,7 @@ def getHistory():
 
 
 @app.route('/login', methods=['POST'])
+@cross_origin()
 def loginUser():
     """API to log in a user."""
     db = connectDB()
@@ -165,6 +167,7 @@ def getResponse():
 
 
 @app.route("/check-namespace",methods=["GET"])
+@cross_origin()
 def check_nameSpace():
     print("called")
     user_id = request.args.get("email")
