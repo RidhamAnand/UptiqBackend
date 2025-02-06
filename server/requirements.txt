@@ -31,6 +31,7 @@ langgraph-sdk==0.1.51
 pinecone==5.4.2
 pinecone-plugin-inference==3.1.0
 pinecone-plugin-interface==0.0.7
+pinecone-client==2.2.4
 pydantic==2.10.6
 pydantic-settings==2.7.1
 pydantic_core==2.27.2
