@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import url from "./util";
+import { backendApi } from "./util";
 
 function UploadFiles() {
   let data = JSON.parse(localStorage.getItem("data"));
@@ -76,7 +76,7 @@ function UploadFiles() {
     formData.append("user_type", data.role);
 
     try {
-      const response = await axios.post(url+"/upload", formData, {
+      const response = await axios.post(backendApi+"/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

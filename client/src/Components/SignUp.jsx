@@ -5,7 +5,9 @@ import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-import url from "./util";
+import { backendApi } from "./util";
+
+
 
 // Define validation schema
 const schema = yup.object().shape({
@@ -36,7 +38,7 @@ function SignUP() {
 
     try {
       setLoading(true)
-      await axios.post(url+"/register", data);
+      await axios.post(backendApi+"/register", data);
       navigate("/login");
     } catch (error) {
       console.log(error.response.data.error);

@@ -1,3 +1,3 @@
-url = "https://info-ai.onrender.com"
+export const backendApi = "https://info-ai.onrender.com"
 
-export default url
+ 

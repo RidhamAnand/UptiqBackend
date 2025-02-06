@@ -4,7 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import url from "./util";
+import { backendApi } from "./util";
 
 // Define validation schema
 const schema = yup.object().shape({
@@ -29,7 +29,7 @@ function Login() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await axios.post(url+"/login", data);
+      const response = await axios.post(backendApi+"/login", data);
       console.log(response.data.message);
       localStorage.setItem("data", JSON.stringify(response.data.result));
       navigate("/onBoard");
