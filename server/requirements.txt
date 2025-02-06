@@ -32,7 +32,6 @@ langgraph-sdk==0.1.51
 loguru==0.7.3
 marshmallow==3.26.0
 matplotlib==3.9.2
-mkl-service==2.4.0
 msgpack==1.1.0
 oauthlib==3.2.2
 openai==1.59.7
