@@ -6,22 +6,25 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./Components/Login";
 import Dashboard from "./Components/Dashboard";
 import UploadFiles from "./Components/UploadFiles";
+import { Navigate } from 'react-router-dom';
 
 function App() {
- 
+
 
   return (
-   
+
     <Routes>
-      <Route path='/signin' element={<SignUP/>}/>
-      <Route path='/onBoard' element={<OnboardingScreen/>}/>
-      <Route path = '/login' element={<Login/>} />
-      <Route path = '/dashboard' element={<Dashboard/>} />
-      <Route path="/uploadfiles" element={<UploadFiles/>} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      <Route path='/signin' element={<SignUP />} />
+      <Route path='/onBoard' element={<OnboardingScreen />} />
+      <Route path='/login' element={<Login />} />
+      <Route path='/dashboard' element={<Dashboard />} />
+      <Route path="/uploadfiles" element={<UploadFiles />} />
 
 
     </Routes>
-   
+
 
   )
 }
