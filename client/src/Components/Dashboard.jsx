@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import url from "./util";
 
 function Dashboard() {
   const [mainLoader, setMainLoader] = useState(false);
@@ -98,7 +99,7 @@ function Dashboard() {
       setMessages((prev) => [...prev, { text: "loading", sender: "bot", isLoading: true }]);
 
       const response = await axios.get(
-        `http://localhost:5000/getresponse?user_question=${input}&user_id=${user_id}&user_type=${user_type}`
+        `${url}/getresponse?user_question=${input}&user_id=${user_id}&user_type=${user_type}`
       );
 
       // Replace loading message with actual bot response
