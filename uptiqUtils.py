@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/daring-atrium-448311-p9-bb3f69b98364.json
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/daring-atrium-448311-p9-bb3f69b98364.json"
 
 # Initialize FastAPI app
 app = FastAPI(title="Mutual Fund Recommendation API")
