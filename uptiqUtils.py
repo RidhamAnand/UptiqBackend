@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, Body, Depends
 from langchain_google_vertexai import ChatVertexAI
 from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware  
 from typing import *
@@ -11,17 +10,10 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/daring-atrium-448311-p9-bb3f69b98364.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "etc/secrets/daring-atrium-448311-p9-bb3f69b98364.json"
 
 # Initialize FastAPI app
 app = FastAPI(title="Mutual Fund Recommendation API")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow requests from any origin
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],  # Allow all headers
-)
 
 # Define Pydantic models for request and response
 class UserProfile(BaseModel):
@@ -42,7 +34,7 @@ class UserProfile(BaseModel):
 class FundRecommendation(BaseModel):
     scheme_name: str = Field(description="Name of the recommended mutual fund scheme")
     amc_name: str = Field(description="Asset Management Company name")
-    category: str = Field(description="Fund catego```ry")
+    category: str = Field(description="Fund category")
     sub_category: str = Field(description="Fund sub-category")
     risk_level: str = Field(description="Risk level of the fund")
     rationale: str = Field(description="Detailed explanation of why this fund was chosen for this user")
@@ -51,17 +43,14 @@ class FundRecommendation(BaseModel):
     investment_recommendation: str = Field(description="Recommendation on whether to invest via SIP or lumpsum based on user preferences")
 
 class RecommendationOutput(BaseModel):
-    top_recommendations: List[FundRecommendation] = Field(description="List of top 7 fund recommendations")
+    top_recommendations: List[FundRecommendation] = Field(description="List of top 5 fund recommendations")
     overall_strategy: str = Field(description="Overall investment strategy explanation based on user profile")
 
 class ErrorResponse(BaseModel):
     error: str
     detail: Optional[str] = None
 
-# Create output parser
-parser = PydanticOutputParser(pydantic_object=RecommendationOutput)
-
-# Define the prompt template
+# Define template without format instructions
 template = """
 You are a sophisticated mutual fund investment advisor with expertise in Indian markets. Based on a user's investment profile and a database of mutual funds, recommend the top 5 funds that best match the user's preferences and goals.
 
@@ -88,13 +77,9 @@ INSTRUCTIONS:
      * For 7+ year horizon: Use 5-year returns, possibly adjusted upward slightly for long-term compounding
    - Include both the numeric expected returns percentage as a float value and a brief explanation of how you calculated it
    - Recommend whether SIP or lumpsum is better for this specific fund given the user's profile
-5. Strictly return a JSON no other text or response
-
-{format_instructions}
 """
 
-# Global variable to store mutual fund data
-MUTUAL_FUNDS_DATA = [
+MUTUAL_FUNDS_DATA= [
     {
         "scheme_name": "Aditya Birla SL Active Debt Multi-Mgr FoF-Dir Growth",
         "min_sip": "100",
@@ -18022,25 +18007,24 @@ async def generate_recommendations(user_profile: Dict[str, Any], mutual_funds: L
         # Initialize the LLM
         llm = ChatVertexAI(model="gemini-1.5-flash")
         
-        # Create the prompt with format instructions
+        # Create the structured output LLM
+        structured_llm = llm.with_structured_output(RecommendationOutput)
+        
+        # Create the prompt
         prompt = PromptTemplate(
             template=template,
-            input_variables=["user_profile", "mutual_funds"],
-            partial_variables={"format_instructions": parser.get_format_instructions()}
+            input_variables=["user_profile", "mutual_funds"]
         )
         
         # Format the prompt with user profile and mutual fund data
         formatted_prompt = prompt.format(
             user_profile=json.dumps(user_profile, indent=2),
-            mutual_funds=json.dumps(mutual_funds[:500], indent=2)  # Limiting to 600 funds to avoid token limits
+            mutual_funds=json.dumps(mutual_funds[:500], indent=2)  # Limiting to 500 funds to avoid token limits
         )
         
-        # Get the recommendation from the LLM
-        response = llm.invoke(formatted_prompt)
-        print(response.content)
-        # Parse the response
-        parsed_output = parser.parse(response.content)
-        return parsed_output
+        # Get the structured recommendation directly from the LLM
+        recommendations = structured_llm.invoke(formatted_prompt)
+        return recommendations
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating recommendations: {str(e)}")
 
@@ -18058,6 +18042,15 @@ async def recommend_funds(
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Health check endpoint
 @app.get("/health")
