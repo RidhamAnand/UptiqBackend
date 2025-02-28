@@ -3,6 +3,7 @@ from langchain_google_vertexai import ChatVertexAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware  
 from typing import *
 import json
 import os
@@ -14,6 +15,13 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/daring-atrium-44831
 
 # Initialize FastAPI app
 app = FastAPI(title="Mutual Fund Recommendation API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow requests from any origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Define Pydantic models for request and response
 class UserProfile(BaseModel):
@@ -34,7 +42,7 @@ class UserProfile(BaseModel):
 class FundRecommendation(BaseModel):
     scheme_name: str = Field(description="Name of the recommended mutual fund scheme")
     amc_name: str = Field(description="Asset Management Company name")
-    category: str = Field(description="Fund category")
+    category: str = Field(description="Fund catego```ry")
     sub_category: str = Field(description="Fund sub-category")
     risk_level: str = Field(description="Risk level of the fund")
     rationale: str = Field(description="Detailed explanation of why this fund was chosen for this user")
@@ -18024,7 +18032,7 @@ async def generate_recommendations(user_profile: Dict[str, Any], mutual_funds: L
         # Format the prompt with user profile and mutual fund data
         formatted_prompt = prompt.format(
             user_profile=json.dumps(user_profile, indent=2),
-            mutual_funds=json.dumps(mutual_funds[:600], indent=2)  # Limiting to 600 funds to avoid token limits
+            mutual_funds=json.dumps(mutual_funds[:500], indent=2)  # Limiting to 600 funds to avoid token limits
         )
         
         # Get the recommendation from the LLM
