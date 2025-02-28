@@ -18057,6 +18057,138 @@ app.add_middleware(
 async def health_check():
     return {"status": "healthy"}
 
+
+@app.post("/compare-funds")
+async def compare_funds(request_data: Dict[str, Any] = Body(...)):
+    try:
+        # The request body is now directly available as request_data
+        comparison_request = request_data
+        
+        # Extract the two fund names or IDs from the request
+        fund1_identifier = comparison_request.get("fund1")
+        fund2_identifier = comparison_request.get("fund2")
+        
+        if fund1_identifier is None or fund2_identifier is None:
+            raise HTTPException(status_code=400, detail="Both fund1 and fund2 identifiers are required")
+        
+        # Get all mutual funds
+        
+        
+        # Find the two funds in the data
+        fund1 = None
+        fund2 = None
+        
+        # Handle both string names and integer IDs
+     
+           # If fund1 is a string, assume it's a name
+        for fund in MUTUAL_FUNDS_DATA:
+            if fund.get("scheme_name") == fund1_identifier:
+                fund1 = fund
+                break
+        
+        
+       
+            # If fund2 is a string, assume it's a name
+            for fund in MUTUAL_FUNDS_DATA:
+                if fund.get("scheme_name") == fund2_identifier:
+                    fund2 = fund
+                    break
+        
+        if not fund1:
+            raise HTTPException(status_code=404, detail=f"Fund '{fund1_identifier}' not found")
+        if not fund2:
+            raise HTTPException(status_code=404, detail=f"Fund '{fund2_identifier}' not found")
+        
+        # Initialize the LLM
+        llm = ChatVertexAI(model="gemini-1.5-flash")
+        
+        # Create the prompt template for fund comparison
+        comparison_template = """
+        You are a financial advisor specializing in mutual funds analysis.
+        
+        Please compare the following two mutual funds and provide a detailed analysis:
+        
+        Fund 1: {fund1}
+        
+        Fund 2: {fund2}
+        
+        Provide a comprehensive comparison including:
+        1. A summary of both funds
+        2. Return comparison (1yr, 3yr, 5yr returns)
+        3. Risk comparison (Sharpe ratio, Sortino ratio, Standard deviation, Beta, Alpha)
+        4. Cost comparison (expense ratio, minimum investment)
+        5. A recommendation on which fund might be better and why
+        
+        Format your response as a valid JSON object with the following structure (make sure it's valid JSON):
+        {{
+            "summary": "Overall comparison of the funds",
+            "return_comparison": {{
+                "1yr_analysis": "Comparison of 1-year returns",
+                "3yr_analysis": "Comparison of 3-year returns",
+                "5yr_analysis": "Comparison of 5-year returns",
+                "overall_returns_winner": "Fund with better overall returns"
+            }},
+            "risk_comparison": {{
+                "sharpe_analysis": "Comparison of Sharpe ratios",
+                "sortino_analysis": "Comparison of Sortino ratios",
+                "standard_deviation_analysis": "Comparison of Standard deviations",
+                "beta_analysis": "Comparison of Beta values",
+                "alpha_analysis": "Comparison of Alpha values",
+                "overall_risk_winner": "Fund with better risk metrics"
+            }},
+            "cost_comparison": {{
+                "expense_ratio_analysis": "Comparison of expense ratios",
+                "minimum_investment_analysis": "Comparison of minimum investments",
+                "overall_cost_winner": "Fund with better cost structure"
+            }},
+            "recommendation": "Final recommendation with rationale"
+        }}
+
+        IMPORTANT: Make sure your response is a valid JSON object that strictly follows the structure above.
+        Do not include any text outside of the JSON object.
+        """
+        
+        # Create the prompt
+        comparison_prompt = PromptTemplate(
+            template=comparison_template,
+            input_variables=["fund1", "fund2"]
+        )
+        
+        # Format the prompt with the two fund data
+        formatted_comparison_prompt = comparison_prompt.format(
+            fund1=json.dumps(fund1, indent=2),
+            fund2=json.dumps(fund2, indent=2)
+        )
+        
+        # Get the response from LLM as raw text
+        raw_response = llm.invoke(formatted_comparison_prompt)
+        
+        # Parse the raw text response as JSON
+        try:
+            # Extract the JSON string from the response
+            text_content = raw_response.content
+            
+            # Parse the JSON response
+            comparison_result = json.loads(text_content)
+            
+            # Return the parsed JSON directly
+            return comparison_result
+            
+        except (json.JSONDecodeError, AttributeError) as e:
+            # Raise HTTP exception if JSON parsing fails
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Failed to parse LLM response as JSON: {str(e)}"
+            )
+        
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+    except HTTPException:
+        # Re-raise any HTTP exceptions
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error comparing funds: {str(e)}")
+
 # Run the API with uvicorn
 if __name__ == "__main__":
     import uvicorn
