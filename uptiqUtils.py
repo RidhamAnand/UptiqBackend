@@ -18072,27 +18072,23 @@ async def compare_funds(request_data: Dict[str, Any] = Body(...)):
             raise HTTPException(status_code=400, detail="Both fund1 and fund2 identifiers are required")
         
         # Get all mutual funds
-        
+        mutual_funds = get_mutual_funds()
         
         # Find the two funds in the data
         fund1 = None
         fund2 = None
         
-        # Handle both string names and integer IDs
-     
-           # If fund1 is a string, assume it's a name
-        for fund in MUTUAL_FUNDS_DATA:
+       
+        for fund in mutual_funds:
             if fund.get("scheme_name") == fund1_identifier:
                 fund1 = fund
                 break
         
         
-       
-            # If fund2 is a string, assume it's a name
-            for fund in MUTUAL_FUNDS_DATA:
-                if fund.get("scheme_name") == fund2_identifier:
-                    fund2 = fund
-                    break
+        for fund in mutual_funds:
+            if fund.get("scheme_name") == fund2_identifier:
+                fund2 = fund
+                break
         
         if not fund1:
             raise HTTPException(status_code=404, detail=f"Fund '{fund1_identifier}' not found")
@@ -18101,6 +18097,9 @@ async def compare_funds(request_data: Dict[str, Any] = Body(...)):
         
         # Initialize the LLM
         llm = ChatVertexAI(model="gemini-1.5-flash")
+        
+        # Create LLM with structured output using Pydantic model
+        structured_llm = llm.with_structured_output(FundComparisonOutput)
         
         # Create the prompt template for fund comparison
         comparison_template = """
@@ -18119,33 +18118,7 @@ async def compare_funds(request_data: Dict[str, Any] = Body(...)):
         4. Cost comparison (expense ratio, minimum investment)
         5. A recommendation on which fund might be better and why
         
-        Format your response as a valid JSON object with the following structure (make sure it's valid JSON):
-        {{
-            "summary": "Overall comparison of the funds",
-            "return_comparison": {{
-                "1yr_analysis": "Comparison of 1-year returns",
-                "3yr_analysis": "Comparison of 3-year returns",
-                "5yr_analysis": "Comparison of 5-year returns",
-                "overall_returns_winner": "Fund with better overall returns"
-            }},
-            "risk_comparison": {{
-                "sharpe_analysis": "Comparison of Sharpe ratios",
-                "sortino_analysis": "Comparison of Sortino ratios",
-                "standard_deviation_analysis": "Comparison of Standard deviations",
-                "beta_analysis": "Comparison of Beta values",
-                "alpha_analysis": "Comparison of Alpha values",
-                "overall_risk_winner": "Fund with better risk metrics"
-            }},
-            "cost_comparison": {{
-                "expense_ratio_analysis": "Comparison of expense ratios",
-                "minimum_investment_analysis": "Comparison of minimum investments",
-                "overall_cost_winner": "Fund with better cost structure"
-            }},
-            "recommendation": "Final recommendation with rationale"
-        }}
-
-        IMPORTANT: Make sure your response is a valid JSON object that strictly follows the structure above.
-        Do not include any text outside of the JSON object.
+        Note: In your response, use 'yr1_analysis', 'yr3_analysis', and 'yr5_analysis' as the keys for the yearly return analysis fields.
         """
         
         # Create the prompt
@@ -18160,25 +18133,26 @@ async def compare_funds(request_data: Dict[str, Any] = Body(...)):
             fund2=json.dumps(fund2, indent=2)
         )
         
-        # Get the response from LLM as raw text
-        raw_response = llm.invoke(formatted_comparison_prompt)
-        
-        # Parse the raw text response as JSON
+        # Get structured output from LLM
         try:
-            # Extract the JSON string from the response
-            text_content = raw_response.content
+            comparison_result = structured_llm.invoke(formatted_comparison_prompt)
             
-            # Parse the JSON response
-            comparison_result = json.loads(text_content)
+            # Convert the Pydantic model to dict for returning as JSON
+            return comparison_result.dict()
             
-            # Return the parsed JSON directly
-            return comparison_result
-            
-        except (json.JSONDecodeError, AttributeError) as e:
-            # Raise HTTP exception if JSON parsing fails
+        except Exception as e:
+            # Fallback to non-structured output if there's an error
+            try:
+                # Try to get a regular response
+                llm_response = llm.invoke(formatted_comparison_prompt)
+                error_message = f"Structured output failed: {str(e)}. Raw response start: {llm_response.content[:200]}"
+            except:
+                error_message = f"Structured output failed: {str(e)}. Could not get raw response."
+                
+            # Raise HTTP exception
             raise HTTPException(
                 status_code=500, 
-                detail=f"Failed to parse LLM response as JSON: {str(e)}"
+                detail=error_message
             )
         
     except json.JSONDecodeError:
