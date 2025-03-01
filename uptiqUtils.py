@@ -18057,6 +18057,36 @@ app.add_middleware(
 async def health_check():
     return {"status": "healthy"}
 
+from pydantic import BaseModel, Field
+from typing import Dict, Any, List
+
+# Define Pydantic models for structured output
+class ReturnComparison(BaseModel):
+    yr1_analysis: str = Field(..., description="Comparison of 1-year returns")
+    yr3_analysis: str = Field(..., description="Comparison of 3-year returns")
+    yr5_analysis: str = Field(..., description="Comparison of 5-year returns")
+    overall_returns_winner: str = Field(..., description="Fund with better overall returns")
+
+class RiskComparison(BaseModel):
+    sharpe_analysis: str = Field(..., description="Comparison of Sharpe ratios")
+    sortino_analysis: str = Field(..., description="Comparison of Sortino ratios")
+    standard_deviation_analysis: str = Field(..., description="Comparison of Standard deviations")
+    beta_analysis: str = Field(..., description="Comparison of Beta values")
+    alpha_analysis: str = Field(..., description="Comparison of Alpha values")
+    overall_risk_winner: str = Field(..., description="Fund with better risk metrics")
+
+class CostComparison(BaseModel):
+    expense_ratio_analysis: str = Field(..., description="Comparison of expense ratios")
+    minimum_investment_analysis: str = Field(..., description="Comparison of minimum investments")
+    overall_cost_winner: str = Field(..., description="Fund with better cost structure")
+
+class FundComparisonOutput(BaseModel):
+    summary: str = Field(..., description="Overall comparison of the funds")
+    return_comparison: ReturnComparison
+    risk_comparison: RiskComparison
+    cost_comparison: CostComparison
+    recommendation: str = Field(..., description="Final recommendation with rationale")
+    
 
 @app.post("/compare-funds")
 async def compare_funds(request_data: Dict[str, Any] = Body(...)):
